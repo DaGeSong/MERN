@@ -6,17 +6,17 @@ const App = () => {
   const [countries, setCountries] = useState([]);
   const [weatherData, setWeatherData] = useState([]);
 
+  const handleSearch = (event) => {
+    setSearchName(event.target.value);
+
+  };
+
   useEffect(() => {
     axios.get('https://restcountries.com/v3.1/all')
       .then((response) => {
         setCountries(response.data)
       })
   }, []);
-
-  const handleSearch = (event) => {
-    setSearchName(event.target.value);
-
-  };
 
   const searchedResults = countries.filter((country) => country.name.common.toUpperCase().includes(searchName.toUpperCase())).map((country) => country.name.common);
 
