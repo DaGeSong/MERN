@@ -1,15 +1,17 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import Person from './Person'
+import personService from './personService'
 
 const App = () => {
-  const [persons, setPersons] = useState([
-    { name: 'Arto Hellas', number: '040123456', id: 1 },
-    { name: 'Ada Lovelace', number: '39445323523', id: 2 },
-    { name: 'Dan Abramov', number: '1243234345', id: 3 },
-    { name: 'Mary Poppendieck', number: '39236423122', id: 4 }
-  ])
+  const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('');
   const [newNumber, setNewNumber] = useState('');
   const [searchName, setSearchName] = useState('');
+
+  useEffect(
+    () => {
+      personService.getAll().then((result => setPersons(result)))
+    }, [])
 
   const handleName = (event) => {
     setNewName(event.target.value)
@@ -24,8 +26,8 @@ const App = () => {
     if (persons.map((person) => person.name.toUpperCase()).includes(newName.toUpperCase())) {
       alert(`${newName} is already added to phonebook`);
     } else {
-      const person = { name: newName, number: newNumber, id: persons.length + 1 };
-      setPersons(persons.concat(person));
+      const person = { name: newName, number: newNumber };
+      personService.create(person).then(result => setPersons(persons.concat(result)))
       setNewName('');
       setNewNumber('');
     }
@@ -36,9 +38,6 @@ const App = () => {
 
   }
 
-  const allResults = persons.map((person) => <li key={person.id}>{person.name}: {person.number}</li>);
-  const searchedResults = persons.filter((person) => person.name.toUpperCase().startsWith(searchName.toUpperCase())).map((person) => <li key={person.id}>{person.name}: {person.number}</li>);
-
   return (
     <div>
       <div>
@@ -47,10 +46,10 @@ const App = () => {
       <h2>Phonebook</h2>
       <form onSubmit={addNew}>
         <div>
-          name: <input type='text' value={newName} onChange={handleName} />
+          name: <input type='text' value={newName} onChange={handleName} required />
         </div>
         <div>
-          phone number: <input type='number' value={newNumber} onChange={handleNumber} />
+          phone number: <input type='text' value={newNumber} onChange={handleNumber} required />
         </div>
         <div>
           <button type="submit">add</button>
@@ -58,10 +57,9 @@ const App = () => {
       </form>
       <div>
         <ul>
-          {!searchName ? allResults : searchedResults}
+          <Person persons={persons} setPersons={setPersons} searchName={searchName} />
         </ul>
       </div>
-
     </div>
   )
 }
